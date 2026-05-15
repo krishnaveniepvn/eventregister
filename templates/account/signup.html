@@ -1,0 +1,436 @@
+{% extends 'base.html' %}
+
+{% block title %} - Sign Up{% endblock %}
+
+{% block content %}
+<section class="signup-page">
+    <div class="signup-shell">
+        <aside class="signup-visual" aria-label="EventHub welcome">
+            <div class="signup-visual-overlay"></div>
+            <div class="signup-brand">
+                <span class="signup-brand-mark"><i class="fas fa-calendar-check"></i></span>
+                <span>EventHub</span>
+            </div>
+            <div class="signup-visual-copy">
+                <p class="signup-kicker">Plan. Join. Check in.</p>
+                <h1>Start your event journey today.</h1>
+                <p>Build your profile once and keep every registration, ticket, and hosted event in one organized place.</p>
+            </div>
+            <div class="signup-highlights" aria-label="EventHub account highlights">
+                <span><i class="fas fa-ticket-alt"></i> Tickets</span>
+                <span><i class="fas fa-qrcode"></i> QR check-in</span>
+                <span><i class="fas fa-users"></i> Hosting</span>
+            </div>
+        </aside>
+
+        <div class="signup-panel">
+            <div class="signup-heading">
+                <span class="signup-icon"><i class="fas fa-user-plus"></i></span>
+                <div>
+                    <p class="signup-eyebrow">Create account</p>
+                    <h2>Sign up for EventHub</h2>
+                </div>
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="signup-alert" role="alert">
+                <i class="fas fa-exclamation-circle"></i>
+                <div>
+                    {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'account_signup' %}" class="signup-form" novalidate>
+                {% csrf_token %}
+
+                <div class="signup-field">
+                    <label for="id_email">Email address</label>
+                    <div class="signup-input {% if form.email.errors %}has-error{% endif %}">
+                        <i class="fas fa-envelope"></i>
+                        <input
+                            type="email"
+                            name="email"
+                            id="id_email"
+                            value="{{ form.email.value|default_if_none:'' }}"
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                            required
+                            autofocus
+                            {% if form.email.errors %}aria-invalid="true" aria-describedby="email-error"{% endif %}
+                        >
+                    </div>
+                    {% if form.email.errors %}
+                    <div class="signup-error" id="email-error">{{ form.email.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="signup-field">
+                    <label for="id_password1">Password</label>
+                    <div class="signup-input {% if form.password1.errors %}has-error{% endif %}">
+                        <i class="fas fa-lock"></i>
+                        <input
+                            type="password"
+                            name="password1"
+                            id="id_password1"
+                            placeholder="Create a password"
+                            autocomplete="new-password"
+                            required
+                            {% if form.password1.errors %}aria-invalid="true" aria-describedby="password1-error"{% endif %}
+                        >
+                    </div>
+                    {% if form.password1.errors %}
+                    <div class="signup-error" id="password1-error">{{ form.password1.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="signup-field">
+                    <label for="id_password2">Confirm password</label>
+                    <div class="signup-input {% if form.password2.errors %}has-error{% endif %}">
+                        <i class="fas fa-shield-alt"></i>
+                        <input
+                            type="password"
+                            name="password2"
+                            id="id_password2"
+                            placeholder="Repeat your password"
+                            autocomplete="new-password"
+                            required
+                            {% if form.password2.errors %}aria-invalid="true" aria-describedby="password2-error"{% endif %}
+                        >
+                    </div>
+                    {% if form.password2.errors %}
+                    <div class="signup-error" id="password2-error">{{ form.password2.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+                {% endif %}
+
+                <button type="submit" class="signup-submit">
+                    <i class="fas fa-arrow-right"></i>
+                    <span>Create account</span>
+                </button>
+            </form>
+
+            <p class="signup-login">
+                Already have an account?
+                <a href="{% url 'account_login' %}">Log in</a>
+            </p>
+        </div>
+    </div>
+</section>
+
+<style>
+    .signup-page {
+        min-height: calc(100vh - 143px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 18px;
+        background:
+            radial-gradient(circle at top left, rgba(20, 184, 166, 0.18), transparent 28rem),
+            linear-gradient(135deg, #f7fbff 0%, #eef4f8 45%, #f9fafb 100%);
+    }
+
+    .signup-shell {
+        width: min(1040px, 100%);
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 8px;
+        box-shadow: 0 24px 70px rgba(15, 23, 42, 0.16);
+    }
+
+    .signup-visual {
+        min-height: 620px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 34px;
+        color: #ffffff;
+        background-image: url('/media/event_images/OIP_8.jpg');
+        background-size: cover;
+        background-position: center;
+        isolation: isolate;
+    }
+
+    .signup-visual-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background:
+            linear-gradient(145deg, rgba(12, 20, 34, 0.90) 0%, rgba(17, 94, 89, 0.78) 54%, rgba(15, 23, 42, 0.72) 100%);
+    }
+
+    .signup-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        width: fit-content;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .signup-brand-mark,
+    .signup-icon {
+        width: 42px;
+        height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+    }
+
+    .signup-brand-mark {
+        background: rgba(255, 255, 255, 0.16);
+        border: 1px solid rgba(255, 255, 255, 0.24);
+    }
+
+    .signup-visual-copy {
+        max-width: 470px;
+    }
+
+    .signup-kicker,
+    .signup-eyebrow {
+        margin: 0 0 10px;
+        color: #14b8a6;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .signup-visual-copy h1 {
+        margin: 0;
+        font-size: clamp(2.25rem, 5vw, 4.35rem);
+        line-height: 1.02;
+        font-weight: 800;
+        letter-spacing: 0;
+    }
+
+    .signup-visual-copy p:last-child {
+        margin: 18px 0 0;
+        max-width: 430px;
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 1.02rem;
+        line-height: 1.7;
+    }
+
+    .signup-highlights {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .signup-highlights span {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.24);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.92);
+        font-size: 0.9rem;
+        font-weight: 600;
+        backdrop-filter: blur(8px);
+    }
+
+    .signup-panel {
+        padding: 48px;
+        align-self: center;
+    }
+
+    .signup-heading {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 28px;
+    }
+
+    .signup-icon {
+        flex: 0 0 auto;
+        background: #e6fffb;
+        color: #0f766e;
+        font-size: 1.1rem;
+    }
+
+    .signup-heading h2 {
+        margin: 0;
+        color: #111827;
+        font-size: clamp(1.85rem, 3vw, 2.35rem);
+        line-height: 1.15;
+        font-weight: 800;
+        letter-spacing: 0;
+    }
+
+    .signup-form {
+        display: grid;
+        gap: 18px;
+    }
+
+    .signup-field label {
+        display: block;
+        margin-bottom: 8px;
+        color: #334155;
+        font-size: 0.94rem;
+        font-weight: 700;
+    }
+
+    .signup-input {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 52px;
+        padding: 0 15px;
+        border: 1px solid #d9e2ec;
+        border-radius: 8px;
+        background: #f8fafc;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+    .signup-input i {
+        color: #64748b;
+        font-size: 0.96rem;
+    }
+
+    .signup-input input {
+        width: 100%;
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: #111827;
+        font-size: 1rem;
+    }
+
+    .signup-input input::placeholder {
+        color: #94a3b8;
+    }
+
+    .signup-input:focus-within {
+        border-color: #14b8a6;
+        box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.14);
+        background: #ffffff;
+    }
+
+    .signup-input.has-error {
+        border-color: #dc3545;
+        background: #fff8f8;
+    }
+
+    .signup-error {
+        margin-top: 7px;
+        color: #b42318;
+        font-size: 0.86rem;
+        line-height: 1.4;
+    }
+
+    .signup-alert {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 18px;
+        padding: 13px 14px;
+        border-radius: 8px;
+        background: #fff1f2;
+        color: #9f1239;
+        font-size: 0.92rem;
+    }
+
+    .signup-alert p {
+        margin: 0;
+    }
+
+    .signup-submit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        min-height: 52px;
+        margin-top: 4px;
+        border: 0;
+        border-radius: 8px;
+        background: #0f766e;
+        color: #ffffff;
+        font-size: 1rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .signup-submit:hover,
+    .signup-submit:focus {
+        background: #115e59;
+        box-shadow: 0 14px 28px rgba(15, 118, 110, 0.24);
+        transform: translateY(-1px);
+    }
+
+    .signup-login {
+        margin: 24px 0 0;
+        padding-top: 22px;
+        border-top: 1px solid #e5e7eb;
+        color: #64748b;
+        text-align: center;
+        font-size: 0.96rem;
+    }
+
+    .signup-login a {
+        color: #0f766e;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .signup-login a:hover,
+    .signup-login a:focus {
+        color: #115e59;
+        text-decoration: underline;
+    }
+
+    @media (max-width: 900px) {
+        .signup-shell {
+            grid-template-columns: 1fr;
+            max-width: 560px;
+        }
+
+        .signup-visual {
+            min-height: 330px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .signup-page {
+            align-items: flex-start;
+            padding: 20px 12px;
+        }
+
+        .signup-visual {
+            min-height: 280px;
+            padding: 24px;
+        }
+
+        .signup-visual-copy h1 {
+            font-size: 2rem;
+        }
+
+        .signup-visual-copy p:last-child {
+            font-size: 0.95rem;
+            line-height: 1.55;
+        }
+
+        .signup-panel {
+            padding: 28px 20px 30px;
+        }
+
+        .signup-heading {
+            align-items: flex-start;
+        }
+    }
+</style>
+{% endblock %}
