@@ -3,40 +3,37 @@
 {% block title %} - Upcoming Events{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container">
     <!-- Header Section -->
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h1 class="display-5">
-                <i class="fas fa-calendar-alt text-primary"></i> Upcoming Events
-            </h1>
-            <p class="lead text-muted">Discover and register for exciting events near you</p>
-        </div>
-        <div class="col-md-4 text-end">
-            {% if user.is_authenticated %}
-                <a href="{% url 'create_event' %}" class="btn btn-success btn-lg">
-                    <i class="fas fa-plus-circle"></i> Create Event
-                </a>
-            {% endif %}
+    <div class="page-hero">
+        <div class="row align-items-center g-3">
+            <div class="col-lg-8">
+                <span class="page-kicker"><i class="fas fa-calendar-alt"></i> EventHub</span>
+                <h1>Upcoming Events</h1>
+                <p class="lead mb-0">Discover well-organized events, check seats at a glance, and book your place in a few clicks.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'create_event' %}" class="btn btn-success btn-lg">
+                        <i class="fas fa-plus-circle"></i> Create Event
+                    </a>
+                {% endif %}
+            </div>
         </div>
     </div>
 
     <!-- Search and Filter Section -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-search"></i></span>
-                <input type="text" class="form-control" placeholder="Search events..." id="eventSearch">
-            </div>
+    <div class="filter-bar">
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" class="form-control" placeholder="Search events..." id="eventSearch">
         </div>
-        <div class="col-md-6">
-            <select class="form-select" id="eventFilter">
-                <option value="all">All Events</option>
-                <option value="free">Free Events</option>
-                <option value="paid">Paid Events</option>
-                <option value="available">Available Seats</option>
-            </select>
-        </div>
+        <select class="form-select" id="eventFilter">
+            <option value="all">All Events</option>
+            <option value="free">Free Events</option>
+            <option value="paid">Paid Events</option>
+            <option value="available">Available Seats</option>
+        </select>
     </div>
 
     <!-- Events Grid -->
@@ -49,7 +46,7 @@
                         {% if event.image %}
                             <img src="{{ event.image.url }}" class="card-img-top event-card-img" alt="{{ event.title }}">
                         {% else %}
-                            <div class="event-card-img bg-secondary d-flex align-items-center justify-content-center text-white">
+                            <div class="event-card-img event-image-placeholder">
                                 <i class="fas fa-calendar fa-4x"></i>
                             </div>
                         {% endif %}
@@ -72,7 +69,7 @@
                             <p class="card-text text-muted">{{ event.description|truncatewords:20 }}</p>
                             
                             <!-- Event Details List -->
-                            <ul class="list-unstyled mt-3">
+                            <ul class="list-unstyled event-meta">
                                 <li class="mb-2">
                                     <i class="fas fa-map-marker-alt text-danger"></i>
                                     <strong>Venue:</strong> {{ event.venue }}
@@ -120,7 +117,7 @@
         </div>
     {% else %}
         <!-- No Events Found -->
-        <div class="alert alert-info text-center py-5">
+        <div class="alert alert-info empty-state">
             <i class="fas fa-calendar-times fa-4x mb-3"></i>
             <h4>No Upcoming Events</h4>
             <p>There are no events scheduled at the moment. Check back later or create your own event!</p>
