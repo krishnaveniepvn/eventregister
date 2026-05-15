@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %} - {% if title %}{{ title }}{% else %}Event Form{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-{% if title == 'Create Event' %}plus-circle{% else %}edit{% endif %}"></i>
+                        {% if title %}{{ title }}{% else %}Event Form{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Tips Card -->
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Tips for creating a great event:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Add a clear, descriptive title</li>
+                            <li>Include detailed description with agenda</li>
+                            <li>Upload an eye-catching image</li>
+                            <li>Set accurate capacity and pricing</li>
+                        </ul>
+                    </div>
+
+                    <!-- Event Form -->
+                    <form method="post" enctype="multipart/form-data" id="eventForm">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <!-- Form Actions -->
+                        <div class="mt-4 d-flex justify-content-between">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Save Event
+                            </button>
+                            <a href="{% url 'event_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Preview Card (Optional) -->
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-eye"></i> Preview</h5>
+                </div>
+                <div class="card-body">
+                    <div id="preview">
+                        <h5 id="previewTitle">Event Title Preview</h5>
+                        <p id="previewDescription">Event description will appear here...</p>
+                        <p><strong>Venue:</strong> <span id="previewVenue">-</span></p>
+                        <p><strong>Date:</strong> <span id="previewDate">-</span></p>
+                        <p><strong>Capacity:</strong> <span id="previewCapacity">-</span></p>
+                        <p><strong>Price:</strong> <span id="previewPrice">-</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Live Preview Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const titleInput = document.getElementById('id_title');
+        const descInput = document.getElementById('id_description');
+        const venueInput = document.getElementById('id_venue');
+        const dateInput = document.getElementById('id_date');
+        const capacityInput = document.getElementById('id_capacity');
+        const priceInput = document.getElementById('id_price');
+
+        if (titleInput) {
+            titleInput.addEventListener('input', function() {
+                document.getElementById('previewTitle').textContent = this.value || 'Event Title Preview';
+            });
+        }
+
+        if (descInput) {
+            descInput.addEventListener('input', function() {
+                document.getElementById('previewDescription').textContent = this.value || 'Event description will appear here...';
+            });
+        }
+
+        if (venueInput) {
+            venueInput.addEventListener('input', function() {
+                document.getElementById('previewVenue').textContent = this.value || '-';
+            });
+        }
+
+        if (dateInput) {
+            dateInput.addEventListener('input', function() {
+                if (this.value) {
+                    const date = new Date(this.value);
+                    document.getElementById('previewDate').textContent = date.toLocaleString();
+                } else {
+                    document.getElementById('previewDate').textContent = '-';
+                }
+            });
+        }
+
+        if (capacityInput) {
+            capacityInput.addEventListener('input', function() {
+                document.getElementById('previewCapacity').textContent = this.value || '-';
+            });
+        }
+
+        if (priceInput) {
+            priceInput.addEventListener('input', function() {
+                const price = parseFloat(this.value) || 0;
+                document.getElementById('previewPrice').textContent = price === 0 ? 'Free' : '$' + price;
+            });
+        }
+    });
+</script>
+{% endblock %}

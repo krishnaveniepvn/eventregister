@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %} - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'event_list' %}"><i class="fas fa-home"></i> Events</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ event.title|truncatechars:30 }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Main Content Column -->
+        <div class="col-md-8">
+            <!-- Event Image -->
+            {% if event.image %}
+                <div class="mb-4">
+                    <img src="{{ event.image.url }}" class="img-fluid rounded shadow" alt="{{ event.title }}" style="max-height: 400px; width: 100%; object-fit: cover;">
+                </div>
+            {% endif %}
+            
+            <!-- Event Title and Description -->
+            <h1 class="display-5 mb-3">{{ event.title }}</h1>
+            
+            <div class="mb-4">
+                <span class="badge bg-primary p-2">
+                    <i class="fas fa-info-circle"></i> Event Details
+                </span>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Description</h5>
+                    <p class="card-text">{{ event.description|linebreaks }}</p>
+                </div>
+            </div>
+            
+            <!-- Organizer Info (Visible to staff/creator) -->
+            {% if user.is_staff or event.created_by == user %}
+                <div class="card mb-4 border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-tools"></i> Management Tools</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Created by:</strong> {{ event.created_by.email }}</p>
+                        <p><strong>Created on:</strong> {{ event.created_at|date:"F j, Y" }}</p>
+                        <p><strong>Total Registrations:</strong> {{ event.registrations.count }}</p>
+                        <p><strong>Confirmed:</strong> {{ event.registrations.confirmed.count }}</p>
+                        <p><strong>Attended:</strong> {{ event.registrations.attended.count }}</p>
+                        
+                        <div class="btn-group">
+                            <a href="{% url 'admin:events_event_change' event.pk %}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Edit in Admin
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar Column -->
+        <div class="col-md-4">
+            <!-- Registration Card -->
+            <div class="card mb-4 sticky-top" style="top: 20px; z-index: 100;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-ticket-alt"></i> Registration Info</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Event Details Summary -->
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                            <span>{{ event.venue }}</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-calendar-alt text-primary me-2"></i>
+                            <span>{{ event.date|date:"l, F j, Y" }}</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-clock text-info me-2"></i>
+                            <span>{{ event.date|date:"g:i A" }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Availability Progress Bar -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-users"></i> Availability:
+                            <span class="{% if event.available_seats > 10 %}text-success{% elif event.available_seats > 0 %}text-warning{% else %}text-danger{% endif %}">
+                                {{ event.available_seats }}/{{ event.capacity }} seats available
+                            </span>
+                        </label>
+                        <div class="progress" style="height: 25px;">
+                            {% widthratio event.registrations.count event.capacity 100 as percentage %}
+                            <div class="progress-bar {% if percentage < 50 %}bg-success{% elif percentage < 80 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                 role="progressbar" 
+                                 style="width: {{ percentage }}%;"
+                                 aria-valuenow="{{ event.registrations.count }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="{{ event.capacity }}">
+                                {{ percentage }}% Full
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="mb-4 text-center">
+                        <h3>
+                            {% if event.price == 0 %}
+                                <span class="badge bg-success p-3 fs-4">
+                                    <i class="fas fa-gift"></i> FREE
+                                </span>
+                            {% else %}
+                                <span class="badge bg-primary p-3 fs-4">
+                                    <i class="fas fa-tag"></i> ${{ event.price }}
+                                </span>
+                            {% endif %}
+                        </h3>
+                    </div>
+
+                    <!-- Registration Actions -->
+                    {% if user.is_authenticated %}
+                        {% if user_registered %}
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> 
+                                <strong>You are registered!</strong>
+                                <p class="mb-0 mt-2">Check your email for the ticket or view in "My Registrations".</p>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'my_registrations' %}" class="btn btn-primary">
+                                    <i class="fas fa-ticket-alt"></i> View My Tickets
+                                </a>
+                            </div>
+                        {% else %}
+                            {% if event.available_seats > 0 %}
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'register_event' event.pk %}" class="btn btn-success btn-lg">
+                                        <i class="fas fa-check-circle"></i> Register Now
+                                    </a>
+                                </div>
+                                <p class="text-muted text-center mt-2 small">
+                                    <i class="fas fa-lock"></i> Secure registration
+                                </p>
+                            {% else %}
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-times-circle"></i> 
+                                    <strong>Event Full!</strong>
+                                    <p class="mb-0 mt-2">No seats available for this event.</p>
+                                </div>
+                                <button class="btn btn-secondary w-100" disabled>
+                                    <i class="fas fa-ban"></i> Registration Closed
+                                </button>
+                            {% endif %}
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> 
+                            Please login to register for this event.
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'account_login' %}?next={{ request.path }}" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt"></i> Login to Register
+                            </a>
+                            <a href="{% url 'account_signup' %}?next={{ request.path }}" class="btn btn-outline-primary">
+                                <i class="fas fa-user-plus"></i> Create Account
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Share Event Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-share-alt"></i> Share This Event</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-around">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="text-primary">
+                            <i class="fab fa-facebook fa-2x"></i>
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text=Check out this event: {{ event.title }}" target="_blank" class="text-info">
+                            <i class="fab fa-twitter fa-2x"></i>
+                        </a>
+                        <a href="https://wa.me/?text={{ request.build_absolute_uri }}" target="_blank" class="text-success">
+                            <i class="fab fa-whatsapp fa-2x"></i>
+                        </a>
+                        <a href="mailto:?subject={{ event.title }}&body=Check out this event: {{ request.build_absolute_uri }}" class="text-secondary">
+                            <i class="far fa-envelope fa-2x"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

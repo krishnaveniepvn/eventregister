@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %} - Upcoming Events{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5">
+                <i class="fas fa-calendar-alt text-primary"></i> Upcoming Events
+            </h1>
+            <p class="lead text-muted">Discover and register for exciting events near you</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_authenticated %}
+                <a href="{% url 'create_event' %}" class="btn btn-success btn-lg">
+                    <i class="fas fa-plus-circle"></i> Create Event
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control" placeholder="Search events..." id="eventSearch">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <select class="form-select" id="eventFilter">
+                <option value="all">All Events</option>
+                <option value="free">Free Events</option>
+                <option value="paid">Paid Events</option>
+                <option value="available">Available Seats</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Events Grid -->
+    {% if events %}
+        <div class="row" id="eventsContainer">
+            {% for event in events %}
+                <div class="col-md-4 mb-4 event-card" data-price="{{ event.price }}" data-seats="{{ event.available_seats }}">
+                    <div class="card h-100">
+                        <!-- Event Image -->
+                        {% if event.image %}
+                            <img src="{{ event.image.url }}" class="card-img-top event-card-img" alt="{{ event.title }}">
+                        {% else %}
+                            <div class="event-card-img bg-secondary d-flex align-items-center justify-content-center text-white">
+                                <i class="fas fa-calendar fa-4x"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Event Status Badge -->
+                        <div class="position-absolute top-0 end-0 m-2">
+                            {% if event.available_seats > 0 %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check-circle"></i> {{ event.available_seats }} seats left
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-times-circle"></i> Full
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="card-body">
+                            <h5 class="card-title">{{ event.title }}</h5>
+                            <p class="card-text text-muted">{{ event.description|truncatewords:20 }}</p>
+                            
+                            <!-- Event Details List -->
+                            <ul class="list-unstyled mt-3">
+                                <li class="mb-2">
+                                    <i class="fas fa-map-marker-alt text-danger"></i>
+                                    <strong>Venue:</strong> {{ event.venue }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-calendar-day text-primary"></i>
+                                    <strong>Date:</strong> {{ event.date|date:"l, F j, Y" }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-clock text-info"></i>
+                                    <strong>Time:</strong> {{ event.date|date:"g:i A" }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-users text-success"></i>
+                                    <strong>Capacity:</strong> {{ event.capacity }} people
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-tag text-warning"></i>
+                                    <strong>Price:</strong> 
+                                    {% if event.price == 0 %}
+                                        <span class="text-success fw-bold">Free</span>
+                                    {% else %}
+                                        <span class="text-primary fw-bold">${{ event.price }}</span>
+                                    {% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Card Footer with Actions -->
+                        <div class="card-footer bg-transparent">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'event_detail' event.pk %}" class="btn btn-primary">
+                                    <i class="fas fa-info-circle"></i> View Details
+                                </a>
+                                {% if user.is_authenticated and event.available_seats > 0 %}
+                                    <a href="{% url 'register_event' event.pk %}" class="btn btn-success">
+                                        <i class="fas fa-ticket-alt"></i> Register Now
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- No Events Found -->
+        <div class="alert alert-info text-center py-5">
+            <i class="fas fa-calendar-times fa-4x mb-3"></i>
+            <h4>No Upcoming Events</h4>
+            <p>There are no events scheduled at the moment. Check back later or create your own event!</p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'create_event' %}" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus-circle"></i> Create Your First Event
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+<!-- Event Search Script -->
+<script>
+    document.getElementById('eventSearch').addEventListener('keyup', function() {
+        let searchText = this.value.toLowerCase();
+        let eventCards = document.querySelectorAll('.event-card');
+        
+        eventCards.forEach(function(card) {
+            let title = card.querySelector('.card-title').textContent.toLowerCase();
+            let description = card.querySelector('.card-text').textContent.toLowerCase();
+            
+            if (title.includes(searchText) || description.includes(searchText)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    document.getElementById('eventFilter').addEventListener('change', function() {
+        let filterValue = this.value;
+        let eventCards = document.querySelectorAll('.event-card');
+        
+        eventCards.forEach(function(card) {
+            let price = parseFloat(card.dataset.price);
+            let seats = parseInt(card.dataset.seats);
+            
+            if (filterValue === 'all') {
+                card.style.display = 'block';
+            } else if (filterValue === 'free' && price === 0) {
+                card.style.display = 'block';
+            } else if (filterValue === 'paid' && price > 0) {
+                card.style.display = 'block';
+            } else if (filterValue === 'available' && seats > 0) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

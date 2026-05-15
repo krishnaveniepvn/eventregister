@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %} - My Created Events{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5">
+                <i class="fas fa-calendar-plus text-primary"></i> Events I've Created
+            </h1>
+            <p class="lead text-muted">Manage and monitor your events</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'create_event' %}" class="btn btn-success btn-lg">
+                <i class="fas fa-plus-circle"></i> Create New Event
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    {% if events %}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Total Events</h5>
+                    <h2>{{ events.count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Active Events</h5>
+                    <h2>{{ events.active.count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Total Registrations</h5>
+                    <h2>{{ total_registrations|default:"0" }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Upcoming Events</h5>
+                    <h2>{{ events.upcoming.count }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Events List -->
+    {% if events %}
+        <div class="row">
+            {% for event in events %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                {% if event.image %}
+                                    <img src="{{ event.image.url }}" class="img-fluid rounded-start h-100" style="object-fit: cover;" alt="{{ event.title }}">
+                                {% else %}
+                                    <div class="bg-secondary h-100 d-flex align-items-center justify-content-center text-white">
+                                        <i class="fas fa-calendar fa-3x"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ event.title }}</h5>
+                                    <p class="card-text text-muted">{{ event.description|truncatewords:20 }}</p>
+                                    
+                                    <!-- Event Stats -->
+                                    <div class="row mb-3">
+                                        <div class="col-6">
+                                            <small class="text-muted">
+                                                <i class="fas fa-users"></i> 
+                                                {{ event.registrations.count }}/{{ event.capacity }} registered
+                                            </small>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar"></i> 
+                                                {{ event.date|date:"M j" }}
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <!-- Progress Bar -->
+                                    <div class="progress mb-3" style="height: 10px;">
+                                        {% widthratio event.registrations.count event.capacity 100 as percentage %}
+                                        <div class="progress-bar {% if percentage < 50 %}bg-success{% elif percentage < 80 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                             style="width: {{ percentage }}%"></div>
+                                    </div>
+
+                                    <!-- Status Badge -->
+                                    <div class="mb-3">
+                                        {% if event.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                        
+                                        {% if event.date > now %}
+                                            <span class="badge bg-primary">Upcoming</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Past</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'event_detail' event.pk %}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a href="{% url 'admin:events_event_change' event.pk %}" class="btn btn-sm btn-warning">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        {% if user.is_staff %}
+                                            <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#statsModal{{ event.pk }}">
+                                                <i class="fas fa-chart-bar"></i> Stats
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Modal for each event -->
+                {% if user.is_staff %}
+                <div class="modal fade" id="statsModal{{ event.pk }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Event Statistics - {{ event.title }}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <canvas id="chart{{ event.pk }}" width="400" height="200"></canvas>
+                                <hr>
+                                <table class="table">
+                                    <tr>
+                                        <th>Total Registrations:</th>
+                                        <td>{{ event.registrations.count }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Confirmed:</th>
+                                        <td>{{ event.registrations.confirmed.count }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Attended:</th>
+                                        <td>{{ event.registrations.attended.count }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Cancelled:</th>
+                                        <td>{{ event.registrations.cancelled.count }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const ctx = document.getElementById('chart{{ event.pk }}').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'pie',
+                            data: {
+                                labels: ['Confirmed', 'Attended', 'Cancelled'],
+                                datasets: [{
+                                    data: [
+                                        {{ event.registrations.confirmed.count }},
+                                        {{ event.registrations.attended.count }},
+                                        {{ event.registrations.cancelled.count }}
+                                    ],
+                                    backgroundColor: ['#28a745', '#17a2b8', '#dc3545']
+                                }]
+                            }
+                        });
+                    });
+                </script>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- No Events Created -->
+        <div class="alert alert-info text-center py-5">
+            <i class="fas fa-calendar-plus fa-4x mb-3"></i>
+            <h4>No Events Created Yet</h4>
+            <p>You haven't created any events. Start by creating your first event!</p>
+            <a href="{% url 'create_event' %}" class="btn btn-primary mt-3">
+                <i class="fas fa-plus-circle"></i> Create Your First Event
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

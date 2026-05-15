@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+
+{% block title %} - My Registrations{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5">
+                <i class="fas fa-ticket-alt text-primary"></i> My Registrations
+            </h1>
+            <p class="lead text-muted">Manage all your event registrations in one place</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Total</h5>
+                    <h2>{{ registrations.count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Confirmed</h5>
+                    <h2>{{ registrations.confirmed.count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Upcoming</h5>
+                    <h2>{{ registrations.upcoming.count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Attended</h5>
+                    <h2>{{ registrations.attended.count }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control" placeholder="Search registrations..." id="searchRegistrations">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <select class="form-select" id="statusFilter">
+                <option value="all">All Status</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="pending">Pending</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="attended">Attended</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Registrations List -->
+    {% if registrations %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" id="registrationsTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Event</th>
+                        <th>Registration Date</th>
+                        <th>Event Date</th>
+                        <th>Ticket #</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reg in registrations %}
+                        <tr class="registration-row" data-status="{{ reg.status }}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if reg.event.image %}
+                                        <img src="{{ reg.event.image.url }}" alt="{{ reg.event.title }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px; margin-right: 10px;">
+                                    {% else %}
+                                        <div style="width: 50px; height: 50px; background: #6c757d; border-radius: 5px; margin-right: 10px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="fas fa-calendar text-white"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <strong>{{ reg.event.title }}</strong><br>
+                                        <small class="text-muted">{{ reg.event.venue|truncatechars:30 }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ reg.registration_date|date:"M j, Y" }}<br><small class="text-muted">{{ reg.registration_date|date:"g:i A" }}</small></td>
+                            <td>
+                                {{ reg.event.date|date:"M j, Y" }}<br>
+                                <small class="text-muted">{{ reg.event.date|date:"g:i A" }}</small>
+                            </td>
+                            <td><code>{{ reg.ticket_number }}</code></td>
+                            <td>
+                                {% if reg.status == 'confirmed' %}
+                                    <span class="badge bg-success">Confirmed</span>
+                                {% elif reg.status == 'pending' %}
+                                    <span class="badge bg-warning">Pending</span>
+                                {% elif reg.status == 'cancelled' %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                                {% elif reg.status == 'attended' %}
+                                    <span class="badge bg-info">Attended</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    {% if reg.status == 'confirmed' %}
+                                        <a href="{% url 'download_ticket' reg.pk %}" class="btn btn-sm btn-primary" title="View Ticket">
+                                            <i class="fas fa-ticket-alt"></i>
+                                        </a>
+                                        {% if reg.event.date > now %}
+                                            <a href="{% url 'cancel_registration' reg.pk %}" class="btn btn-sm btn-danger" 
+                                               onclick="return confirm('Are you sure you want to cancel this registration?')" title="Cancel Registration">
+                                                <i class="fas fa-times"></i>
+                                            </a>
+                                        {% endif %}
+                                    {% endif %}
+                                    <a href="{% url 'event_detail' reg.event.pk %}" class="btn btn-sm btn-info" title="View Event">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Export Options -->
+        <div class="row mt-4">
+            <div class="col">
+                <div class="btn-group">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-download"></i> Export
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="exportTableToCSV()">Export to CSV</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="window.print()">Print List</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- No Registrations -->
+        <div class="alert alert-info text-center py-5">
+            <i class="fas fa-ticket-alt fa-4x mb-3"></i>
+            <h4>No Registrations Yet</h4>
+            <p>You haven't registered for any events. Browse our upcoming events and register today!</p>
+            <a href="{% url 'event_list' %}" class="btn btn-primary mt-3">
+                <i class="fas fa-calendar-alt"></i> Browse Events
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Filter and Search Script -->
+<script>
+    document.getElementById('searchRegistrations').addEventListener('keyup', filterTable);
+    document.getElementById('statusFilter').addEventListener('change', filterTable);
+
+    function filterTable() {
+        const searchText = document.getElementById('searchRegistrations').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value;
+        const rows = document.querySelectorAll('.registration-row');
+
+        rows.forEach(row => {
+            const eventName = row.querySelector('td:first-child strong').textContent.toLowerCase();
+            const ticketNumber = row.querySelector('code').textContent.toLowerCase();
+            const status = row.dataset.status;
+            
+            let matchesSearch = eventName.includes(searchText) || ticketNumber.includes(searchText);
+            let matchesStatus = statusFilter === 'all' || status === statusFilter;
+            
+            row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+        });
+    }
+
+    function exportTableToCSV() {
+        const rows = document.querySelectorAll('.registration-row');
+        const csv = [];
+        
+        // Add headers
+        csv.push(['Event', 'Registration Date', 'Event Date', 'Ticket Number', 'Status'].join(','));
+        
+        rows.forEach(row => {
+            if (row.style.display !== 'none') {
+                const eventName = row.querySelector('td:first-child strong').textContent;
+                const regDate = row.querySelector('td:nth-child(2)').textContent.trim().replace(/\n/g, ' ');
+                const eventDate = row.querySelector('td:nth-child(3)').textContent.trim().replace(/\n/g, ' ');
+                const ticketNum = row.querySelector('code').textContent;
+                const status = row.querySelector('.badge').textContent;
+                
+                csv.push([`"${eventName}"`, `"${regDate}"`, `"${eventDate}"`, `"${ticketNum}"`, `"${status}"`].join(','));
+            }
+        });
+        
+        const csvContent = csv.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'my_registrations.csv';
+        a.click();
+    }
+</script>
+{% endblock %}

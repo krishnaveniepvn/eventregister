@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %} - Ticket for {{ registration.event.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4 no-print">
+    <!-- Print Controls -->
+    <div class="row mb-4">
+        <div class="col">
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="fas fa-print"></i> Print Ticket
+            </button>
+            <a href="{% url 'my_registrations' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Registrations
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Ticket -->
+<div class="container mb-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card ticket-print border-0">
+                <!-- Ticket Header -->
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h3 class="mb-0">
+                        <i class="fas fa-ticket-alt"></i> EVENT TICKET
+                    </h3>
+                </div>
+                
+                <!-- Ticket Body -->
+                <div class="card-body p-4">
+                    <!-- Event Title -->
+                    <h2 class="text-center mb-4">{{ registration.event.title }}</h2>
+                    
+                    <!-- QR Code Section -->
+                    <div class="row mb-4">
+                        <div class="col-md-5 text-center">
+                            {% if registration.qr_code %}
+                                <div class="qr-code-container p-3 border rounded bg-light">
+                                    <h6 class="mb-3">Entry QR Code</h6>
+                                    <img src="{{ registration.qr_code.url }}" alt="QR Code" class="img-fluid" style="max-width: 150px;">
+                                    <p class="mt-2 mb-0"><small>Ticket #: {{ registration.ticket_number }}</small></p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Ticket Details -->
+                        <div class="col-md-7">
+                            <div class="ticket-details">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <th width="40%"><i class="fas fa-calendar"></i> Date:</th>
+                                        <td>{{ registration.event.date|date:"l, F j, Y" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="fas fa-clock"></i> Time:</th>
+                                        <td>{{ registration.event.date|date:"g:i A" }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="fas fa-map-marker-alt"></i> Venue:</th>
+                                        <td>{{ registration.event.venue }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="fas fa-user"></i> Attendee:</th>
+                                        <td>{{ registration.user.get_full_name|default:registration.user.email }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="fas fa-envelope"></i> Email:</th>
+                                        <td>{{ registration.user.email }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="fas fa-hashtag"></i> Ticket #:</th>
+                                        <td><code>{{ registration.ticket_number }}</code></td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="fas fa-check-circle"></i> Status:</th>
+                                        <td>
+                                            <span class="badge bg-success">{{ registration.get_status_display }}</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle"></i> Important Information:</h6>
+                                <ul class="mb-0 small">
+                                    <li>Please present this ticket (digital or printed) at the entrance</li>
+                                    <li>The QR code will be scanned for verification</li>
+                                    <li>Do not share your QR code with others</li>
+                                    <li>Event starts at {{ registration.event.date|date:"g:i A" }} sharp</li>
+                                    <li>Please arrive 15 minutes before the event</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ticket Footer -->
+                <div class="card-footer text-center text-muted py-3">
+                    <small>
+                        <i class="fas fa-copyright"></i> {{ registration.event.created_at|date:"Y" }} EventHub. 
+                        This ticket is valid for one person only.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Actions (Hidden when printing) -->
+<div class="container no-print">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Need Help?</h5>
+                    <p>If you have any issues with your ticket, please contact us:</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-envelope"></i> support@eventhub.com</li>
+                        <li><i class="fas fa-phone"></i> +1 (555) 123-4567</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Print Styles -->
+<style>
+    @media print {
+        body {
+            background-color: white;
+        }
+        .no-print {
+            display: none !important;
+        }
+        .card {
+            border: 2px solid #000 !important;
+            box-shadow: none !important;
+        }
+        .card-header {
+            background-color: #000 !important;
+            color: white !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .badge {
+            background-color: #28a745 !important;
+            color: white !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .alert {
+            border: 1px solid #000 !important;
+            background-color: #f8f9fa !important;
+        }
+        .qr-code-container {
+            border: 1px solid #000 !important;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %} - Registration Successful{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Success Message Card -->
+            <div class="card border-success mb-4">
+                <div class="card-header bg-success text-white text-center py-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-check-circle"></i> Registration Successful!
+                    </h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-ticket-alt fa-5x text-success"></i>
+                    </div>
+                    
+                    <h3 class="mb-3">Thank You, {{ registration.user.get_full_name|default:registration.user.email }}!</h3>
+                    <p class="lead">Your registration for <strong>{{ registration.event.title }}</strong> is confirmed.</p>
+                    
+                    <!-- Important Information -->
+                    <div class="alert alert-info text-start mt-4">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-info-circle"></i> Important Information
+                        </h5>
+                        <ul class="mb-0">
+                            <li>A confirmation email has been sent to <strong>{{ registration.user.email }}</strong></li>
+                            <li>Your ticket number is: <strong>{{ registration.ticket_number }}</strong></li>
+                            <li>Please bring this ticket (digital or printed) to the event</li>
+                            <li>The QR code below will be scanned for entry</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ticket Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-ticket-alt"></i> Your Digital Ticket</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 text-center">
+                            {% if registration.qr_code %}
+                                <div class="qr-code-container p-3 border rounded">
+                                    <h6 class="mb-3">Scan this QR Code at Entry</h6>
+                                    <img src="{{ registration.qr_code.url }}" alt="QR Code" class="img-fluid qr-code-img">
+                                    <p class="mt-2 small text-muted">Ticket #: {{ registration.ticket_number }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <div class="ticket-details">
+                                <h6 class="border-bottom pb-2">Event Details</h6>
+                                <p><strong>Event:</strong> {{ registration.event.title }}</p>
+                                <p><strong>Date:</strong> {{ registration.event.date|date:"l, F j, Y" }}</p>
+                                <p><strong>Time:</strong> {{ registration.event.date|date:"g:i A" }}</p>
+                                <p><strong>Venue:</strong> {{ registration.event.venue }}</p>
+                                <p><strong>Attendee:</strong> {{ registration.user.get_full_name|default:registration.user.email }}</p>
+                                <p><strong>Registration Date:</strong> {{ registration.registration_date|date:"F j, Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row">
+                <div class="col-md-4 mb-2">
+                    <a href="{% url 'download_ticket' registration.pk %}" class="btn btn-primary w-100">
+                        <i class="fas fa-download"></i> Download Ticket
+                    </a>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <button onclick="window.print()" class="btn btn-success w-100">
+                        <i class="fas fa-print"></i> Print Ticket
+                    </button>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <a href="{% url 'my_registrations' %}" class="btn btn-info w-100 text-white">
+                        <i class="fas fa-list"></i> My Registrations
+                    </a>
+                </div>
+            </div>
+
+            <!-- Share Buttons -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="text-center">Share Your Registration</h6>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="btn btn-outline-primary">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text=I just registered for {{ registration.event.title }}!" target="_blank" class="btn btn-outline-info">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri }}" target="_blank" class="btn btn-outline-secondary">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add to Calendar -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="text-center">Add to Calendar</h6>
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="#" class="btn btn-outline-dark">
+                            <i class="fab fa-google"></i> Google
+                        </a>
+                        <a href="#" class="btn btn-outline-dark">
+                            <i class="fab fa-apple"></i> Apple
+                        </a>
+                        <a href="#" class="btn btn-outline-dark">
+                            <i class="fas fa-calendar"></i> Outlook
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Print Styles -->
+<style>
+    @media print {
+        .btn, .navbar, .footer, .card-header, .share-buttons, .add-to-calendar {
+            display: none !important;
+        }
+        .qr-code-container {
+            border: 1px solid #000 !important;
+        }
+    }
+</style>
+{% endblock %}
