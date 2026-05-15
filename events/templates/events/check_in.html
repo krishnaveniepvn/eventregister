@@ -3,7 +3,7 @@
 {% block title %} - Check In Attendee{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container">
     <div class="row justify-content-center">
         <div class="col-md-6">
             <!-- Header -->
@@ -63,7 +63,7 @@
                     <!-- QR Code Display -->
                     {% if registration.qr_code %}
                         <div class="text-center mb-4">
-                            <img src="{{ registration.qr_code.url }}" alt="QR Code" class="img-fluid" style="max-width: 150px;">
+                            <img src="{{ registration.qr_code.url }}" alt="QR Code" class="img-fluid qr-code-img">
                         </div>
                     {% endif %}
 

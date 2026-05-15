@@ -3,45 +3,46 @@
 {% block title %} - My Registrations{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container">
     <!-- Header -->
-    <div class="row mb-4">
-        <div class="col">
-            <h1 class="display-5">
-                <i class="fas fa-ticket-alt text-primary"></i> My Registrations
-            </h1>
-            <p class="lead text-muted">Manage all your event registrations in one place</p>
+    <div class="page-hero">
+        <div class="row align-items-center">
+            <div class="col">
+                <span class="page-kicker"><i class="fas fa-ticket-alt"></i> Tickets</span>
+                <h1>My Registrations</h1>
+                <p class="lead mb-0">Manage your upcoming bookings and ticket status in one place.</p>
+            </div>
         </div>
     </div>
 
     <!-- Statistics Cards -->
     <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card text-white bg-primary">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card text-white bg-primary">
                 <div class="card-body">
                     <h5 class="card-title">Total</h5>
                     <h2>{{ registrations.count }}</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-success">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card text-white bg-success">
                 <div class="card-body">
                     <h5 class="card-title">Confirmed</h5>
                     <h2>{{ registrations.confirmed.count }}</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-warning">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card text-white bg-warning">
                 <div class="card-body">
                     <h5 class="card-title">Upcoming</h5>
                     <h2>{{ registrations.upcoming.count }}</h2>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-info">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card text-white bg-info">
                 <div class="card-body">
                     <h5 class="card-title">Attended</h5>
                     <h2>{{ registrations.attended.count }}</h2>
@@ -51,22 +52,18 @@
     </div>
 
     <!-- Filters -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="input-group">
-                <span class="input-group-text"><i class="fas fa-search"></i></span>
-                <input type="text" class="form-control" placeholder="Search registrations..." id="searchRegistrations">
-            </div>
+    <div class="filter-bar">
+        <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" class="form-control" placeholder="Search registrations..." id="searchRegistrations">
         </div>
-        <div class="col-md-6">
-            <select class="form-select" id="statusFilter">
-                <option value="all">All Status</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="pending">Pending</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="attended">Attended</option>
-            </select>
-        </div>
+        <select class="form-select" id="statusFilter">
+            <option value="all">All Status</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="pending">Pending</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="attended">Attended</option>
+        </select>
     </div>
 
     <!-- Registrations List -->
@@ -89,9 +86,9 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     {% if reg.event.image %}
-                                        <img src="{{ reg.event.image.url }}" alt="{{ reg.event.title }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px; margin-right: 10px;">
+                                        <img src="{{ reg.event.image.url }}" alt="{{ reg.event.title }}" class="thumb me-3">
                                     {% else %}
-                                        <div style="width: 50px; height: 50px; background: #6c757d; border-radius: 5px; margin-right: 10px; display: flex; align-items: center; justify-content: center;">
+                                        <div class="thumb-placeholder me-3">
                                             <i class="fas fa-calendar text-white"></i>
                                         </div>
                                     {% endif %}
@@ -158,7 +155,7 @@
         </div>
     {% else %}
         <!-- No Registrations -->
-        <div class="alert alert-info text-center py-5">
+        <div class="alert alert-info empty-state">
             <i class="fas fa-ticket-alt fa-4x mb-3"></i>
             <h4>No Registrations Yet</h4>
             <p>You haven't registered for any events. Browse our upcoming events and register today!</p>

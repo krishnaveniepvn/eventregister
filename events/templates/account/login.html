@@ -3,157 +3,88 @@
 {% block title %} - User Login{% endblock %}
 
 {% block content %}
-<div class="login-container">
-    <div class="login-box">
-        <h2 class="login-title">User Login</h2>
-        
-        <form method="post" action="{% url 'account_login' %}" class="login-form">
-            {% csrf_token %}
-            
-            <div class="form-group">
-                <label for="id_login">Username</label>
-                <input type="text" name="login" id="id_login" placeholder="Enter username" required autofocus>
-                {% if form.login.errors %}
-                <div class="error">{{ form.login.errors.0 }}</div>
+<div class="auth-page">
+    <div class="auth-panel">
+        <aside class="auth-visual">
+            <div class="auth-brand-mark">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <div>
+                <span class="auth-kicker">EventHub</span>
+                <h1>Welcome back</h1>
+                <p>Pick up where you left off and keep your event plans moving.</p>
+            </div>
+            <div class="auth-highlights">
+                <div>
+                    <strong>24/7</strong>
+                    <span>Access</span>
+                </div>
+                <div>
+                    <strong>QR</strong>
+                    <span>Tickets</span>
+                </div>
+                <div>
+                    <strong>Fast</strong>
+                    <span>Check-in</span>
+                </div>
+            </div>
+        </aside>
+
+        <section class="auth-card">
+            <div class="auth-card-header">
+                <span class="auth-icon"><i class="fas fa-sign-in-alt"></i></span>
+                <h2>Log in</h2>
+                <p>Enter your account details below.</p>
+            </div>
+
+            <form method="post" action="{% url 'account_login' %}" class="login-form auth-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="error-message">
+                    {% for error in form.non_field_errors %}
+                    {{ error }}
+                    {% endfor %}
+                </div>
                 {% endif %}
-            </div>
-            
-            <div class="form-group">
-                <label for="id_password">Password</label>
-                <input type="password" name="password" id="id_password" placeholder="Enter password" required>
-                {% if form.password.errors %}
-                <div class="error">{{ form.password.errors.0 }}</div>
+
+                <div class="form-group auth-field">
+                    <label for="id_login">Email or username</label>
+                    <div class="auth-input">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="login" id="id_login" placeholder="you@example.com" required autofocus>
+                    </div>
+                    {% if form.login.errors %}
+                    <div class="error">{{ form.login.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group auth-field">
+                    <label for="id_password">Password</label>
+                    <div class="auth-input">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="password" id="id_password" placeholder="Enter password" required>
+                    </div>
+                    {% if form.password.errors %}
+                    <div class="error">{{ form.password.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
                 {% endif %}
+
+                <button type="submit" class="login-btn">
+                    <span>Login</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <span>New here?</span>
+                <a href="{% url 'account_signup' %}">Create account</a>
             </div>
-            
-            {% if redirect_field_value %}
-            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-            {% endif %}
-            
-            {% if form.non_field_errors %}
-            <div class="error-message">
-                {% for error in form.non_field_errors %}
-                {{ error }}
-                {% endfor %}
-            </div>
-            {% endif %}
-            
-            <button type="submit" class="login-btn">Login</button>
-        </form>
+        </section>
     </div>
 </div>
-
-<style>
-    .login-container {
-        min-height: calc(100vh - 200px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #f5f5f5;
-        padding: 20px;
-    }
-    
-    .login-box {
-        background: white;
-        padding: 40px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        max-width: 400px;
-    }
-    
-    .login-title {
-        text-align: center;
-        margin-bottom: 30px;
-        color: #333;
-        font-size: 24px;
-        font-weight: 500;
-    }
-    
-    .login-form .form-group {
-        margin-bottom: 20px;
-    }
-    
-    .login-form label {
-        display: block;
-        margin-bottom: 8px;
-        color: #555;
-        font-size: 14px;
-        font-weight: 500;
-    }
-    
-    .login-form input {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-        box-sizing: border-box;
-        transition: border-color 0.3s;
-    }
-    
-    .login-form input:focus {
-        outline: none;
-        border-color: #007bff;
-    }
-    
-    .login-btn {
-        width: 100%;
-        padding: 12px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        font-size: 16px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-    
-    .login-btn:hover {
-        background-color: #0056b3;
-    }
-    
-    .error {
-        color: #dc3545;
-        font-size: 12px;
-        margin-top: 5px;
-    }
-    
-    .error-message {
-        background-color: #f8d7da;
-        color: #721c24;
-        padding: 10px;
-        border-radius: 4px;
-        margin-bottom: 20px;
-        font-size: 14px;
-        text-align: center;
-    }
-    
-    /* Flash messages */
-    .alert {
-        padding: 12px;
-        border-radius: 4px;
-        margin-bottom: 20px;
-        font-size: 14px;
-    }
-    
-    .alert-success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-    
-    .alert-error {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-    
-    .alert-info {
-        background-color: #d1ecf1;
-        color: #0c5460;
-        border: 1px solid #bee5eb;
-    }
-</style>
 {% endblock %}
